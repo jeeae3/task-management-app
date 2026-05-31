@@ -1,5 +1,10 @@
+from routes.tasks import task_pages
 import sqlite3
 import database
+from flask import Flask
+
+app = Flask(__name__)
+app.register_blueprint(task_pages)
 
 if __name__ == "__main__":
     # Create database
@@ -9,10 +14,8 @@ if __name__ == "__main__":
     # Populate database with default data
     database.populate_db_default()
 
-    # Query and print
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM task")  # Can change this query according to needs
-    print(cursor.fetchall())
+    # Run app
+    app.run(host="0.0.0.0", port=4000)
 
     # Close connection
     conn.close()
