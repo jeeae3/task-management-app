@@ -9,29 +9,29 @@ class SqlTaskRepository:
         self._db = database
 
     # ---------- CREATE ----------
-    def create_task(self, category_id: int, title: str, position: int, comment: str, is_completed: bool,
+    def create_task(self, project_id: int, title: str, position: int, comment: str, status: str,
                     due_date: str, created_at: str) -> Task:
 
         conn = sqlite3.connect(self._db)
         cursor = conn.cursor()
 
         cursor.execute("""
-            INSERT INTO "task" (category_id, title, position, comment, is_completed, due_date)
+            INSERT INTO "task" (project_id, title, position, comment, status, due_date)
             VALUES (?, ?, ?, ?, ?, ?)
         """, (
-            category_id,
+            project_id,
             title,
             position,
             comment,
-            1 if is_completed is True else 0,
+            status,
             due_date,
         ))
         conn.commit()
         new_task_id = cursor.lastrowid
         conn.close()
 
-        return Task(task_id=new_task_id, category_id=category_id, title=title, position=position, comment=comment,
-                    is_completed=is_completed, due_date=due_date, created_at=created_at)
+        return Task(task_id=new_task_id, project_id=project_id, title=title, position=position, comment=comment,
+                    status=status, due_date=due_date, created_at=created_at)
 
     # ---------- READ ALL ----------
     def read_tasks(self) -> List[dict]:
@@ -46,11 +46,11 @@ class SqlTaskRepository:
         tasks = [
             Task(
                 task_id=row[0],
-                category_id=row[1],
+                project_id=row[1],
                 title=row[2],
                 position=row[3],
                 comment=row[4],
-                is_completed=row[5],
+                status=row[5],
                 due_date=row[6],
                 created_at=row[7]
             ).as_dict()
@@ -73,11 +73,11 @@ class SqlTaskRepository:
 
         task = Task(
             task_id=row[0],
-            category_id=row[1],
+            project_id=row[1],
             title=row[2],
             position=row[3],
             comment=row[4],
-            is_completed=row[5],
+            status=row[5],
             due_date=row[6],
             created_at=row[7]
         )
@@ -88,11 +88,11 @@ class SqlTaskRepository:
     def update_task(
             self,
             task_id: int,
-            category_id: int,
+            project_id: int,
             title: str,
             position: int,
             comment: Optional[str] = None,
-            is_completed: Optional[bool] = False,
+            status: Optional[str] = 'todo',
             due_date: Optional[str] = None,
             created_at: Optional[str] = None
     ) -> Optional[Task]:
@@ -101,19 +101,19 @@ class SqlTaskRepository:
 
         cursor.execute("""
             UPDATE task
-            SET category_id=?,
+            SET project_id=?,
                 title = ?, 
                 position = ?, 
                 comment = ?, 
-                is_completed = ?, 
+                status = ?, 
                 due_date = ?
             WHERE task_id = ?
         """, (
-            category_id,
+            project_id,
             title,
             position,
             comment,
-            1 if is_completed is True else 0,
+            status,
             due_date,
             task_id
         ))
@@ -127,11 +127,11 @@ class SqlTaskRepository:
 
         return Task(
             task_id=task_id,
-            category_id=category_id,
+            project_id=project_id,
             title=title,
             position=position,
             comment=comment,
-            is_completed=is_completed,
+            status=status,
             due_date=due_date,
             created_at=created_at
         )

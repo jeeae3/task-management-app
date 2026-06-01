@@ -12,11 +12,11 @@ def create_task():
     data = request.json
 
     new_task = repo.create_task(
-        category_id=data.get('category_id'),
+        project_id=data.get('project_id'),
         title=data.get('title'),
         position=data.get('position'),
         comment=data.get('comment'),
-        is_completed=data.get('is_completed'),
+        status=data.get('status'),
         due_date=data.get('due_date'),
         created_at=data.get('created_at')
     )
@@ -53,11 +53,11 @@ def update_task(id):
 
     task = repo.update_task(
         task_id=id,
-        category_id=data.get('category_id'),
+        project_id=data.get('project_id'),
         title=data.get('title'),
         position=data.get('position'),
         comment=data.get('comment'),
-        is_completed=data.get('is_completed'),
+        status=data.get('status'),
         due_date=data.get('due_date'),
         created_at=data.get('created_at')
     )
