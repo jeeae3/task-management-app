@@ -92,6 +92,7 @@ class SqlProjectRepository:
             board_id,
             name,
             position,
+            project_id,
         ))
         conn.commit()
 
