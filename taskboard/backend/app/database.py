@@ -72,73 +72,75 @@ class Database:
         conn = sqlite3.connect(self._database)
         cursor = conn.cursor()
 
-        # Empty and remake current tables
-        cursor.execute("DROP TABLE IF EXISTS user")
-        cursor.execute("DROP TABLE IF EXISTS board")
-        cursor.execute("DROP TABLE IF EXISTS project")
-        cursor.execute("DROP TABLE IF EXISTS task")
-        cursor.execute("DROP TABLE IF EXISTS user_task")
+        cursor.execute("SELECT * FROM user")
+        if cursor.rowcount == 0:
+            # Empty and remake current tables
+            cursor.execute("DROP TABLE IF EXISTS user")
+            cursor.execute("DROP TABLE IF EXISTS board")
+            cursor.execute("DROP TABLE IF EXISTS project")
+            cursor.execute("DROP TABLE IF EXISTS task")
+            cursor.execute("DROP TABLE IF EXISTS user_task")
 
-        self._ensure_tables()
+            self._ensure_tables()
 
-        # Populate tables with pre-generated default data
-        cursor.execute("""
-        INSERT INTO user (username, password) VALUES 
-        ('alice_dev', 'hashed_pass_123'),
-        ('bob_coder', 'hashed_pass_456'),
-        ('charlie_git', 'hashed_pass_789'),
-        ('dana_pixels', 'hashed_pass_012');
-        """)
-        cursor.execute("""
-        INSERT INTO board (user_id, name) VALUES 
-        (1, 'Chess Game')
-        """)
-        cursor.execute("""
-        INSERT INTO project (board_id, name, position) VALUES 
-        (1, 'Backlog', 1),
-        (1, 'Sprint 1', 2),
-        (1, 'Sprint 2', 3),
-        (1, 'Sprint 3', 4);
-        """)
-        cursor.execute("""
-        INSERT INTO task (project_id, title, position, status, due_date, created_at) VALUES
-        (1, 'Implement AI opponent using Minimax algorithm', 1, 'todo', '2026-07-15 23:59:59', CURRENT_TIMESTAMP),
-        (1, 'Add online multiplayer via WebSockets', 2, 'todo', '2026-07-30 23:59:59', CURRENT_TIMESTAMP),
-        (1, 'Design custom chess piece themes', 3, 'todo', NULL, CURRENT_TIMESTAMP),
-        (1, 'Save game history to local storage', 4, 'todo', NULL, CURRENT_TIMESTAMP);
-        """)
-        cursor.execute("""
-        INSERT INTO task (project_id, title, position, status, due_date, created_at) VALUES
-        (2, 'Set up rendering for 8x8 grid chessboard', 1, 'done', '2026-06-05 18:00:00', CURRENT_TIMESTAMP),
-        (2, 'Define core piece movement logic (Pawn, Rook, Knight)', 2, 'done', '2026-06-08 18:00:00', CURRENT_TIMESTAMP),
-        (2, 'Create game initialization state and turn switching', 3, 'done', '2026-06-10 18:00:00', CURRENT_TIMESTAMP);
-        """)
-        cursor.execute("""
-        INSERT INTO task (project_id, title, position, status, due_date, created_at) VALUES
-        (3, 'Implement rule checks for Check and Checkmate', 1, 'in_progress', '2026-06-20 18:00:00', CURRENT_TIMESTAMP),
-        (3, 'Add special move logic (Castling, En Passant)', 2, 'in_progress', '2026-06-22 18:00:00', CURRENT_TIMESTAMP),
-        (3, 'Build basic UI for Captured Pieces sidebar', 3, 'in_progress', '2026-06-25 18:00:00', CURRENT_TIMESTAMP);
-        """)
-        cursor.execute("""
-        INSERT INTO task (project_id, title, position, status, due_date, created_at) VALUES
-        (4, 'Integrate match timer clock (Blitz style)', 1, 'todo', '2026-07-01 12:00:00', CURRENT_TIMESTAMP),
-        (4, 'Write unit tests for move validation matrix', 2, 'todo', '2026-07-03 12:00:00', CURRENT_TIMESTAMP),
-        (4, 'Fix UI collision bugs on mobile screen layouts', 3, 'todo', '2026-07-05 12:00:00', CURRENT_TIMESTAMP);
-        """)
-        cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (1, 1), (2, 1);")
-        cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (3, 2);")
-        cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (4, 3);")
-        cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (1, 4);")
-        cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (4, 5), (1, 5);")
-        cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (2, 6), (3, 6);")
-        cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (3, 7);")
-        cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (2, 8);")
-        cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (1, 9), (3, 9);")
-        cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (4, 10);")
-        cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (2, 11), (4, 11);")
-        cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (3, 12);")
-        cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (4, 13);")
-        conn.commit()
+            # Populate tables with pre-generated default data
+            cursor.execute("""
+            INSERT INTO user (username, password) VALUES 
+            ('alice_dev', 'hashed_pass_123'),
+            ('bob_coder', 'hashed_pass_456'),
+            ('charlie_git', 'hashed_pass_789'),
+            ('dana_pixels', 'hashed_pass_012');
+            """)
+            cursor.execute("""
+            INSERT INTO board (user_id, name) VALUES 
+            (1, 'Chess Game')
+            """)
+            cursor.execute("""
+            INSERT INTO project (board_id, name, position) VALUES 
+            (1, 'Backlog', 1),
+            (1, 'Sprint 1', 2),
+            (1, 'Sprint 2', 3),
+            (1, 'Sprint 3', 4);
+            """)
+            cursor.execute("""
+            INSERT INTO task (project_id, title, position, status, due_date, created_at) VALUES
+            (1, 'Implement AI opponent using Minimax algorithm', 1, 'todo', '2026-07-15 23:59:59', CURRENT_TIMESTAMP),
+            (1, 'Add online multiplayer via WebSockets', 2, 'todo', '2026-07-30 23:59:59', CURRENT_TIMESTAMP),
+            (1, 'Design custom chess piece themes', 3, 'todo', NULL, CURRENT_TIMESTAMP),
+            (1, 'Save game history to local storage', 4, 'todo', NULL, CURRENT_TIMESTAMP);
+            """)
+            cursor.execute("""
+            INSERT INTO task (project_id, title, position, status, due_date, created_at) VALUES
+            (2, 'Set up rendering for 8x8 grid chessboard', 1, 'done', '2026-06-05 18:00:00', CURRENT_TIMESTAMP),
+            (2, 'Define core piece movement logic (Pawn, Rook, Knight)', 2, 'done', '2026-06-08 18:00:00', CURRENT_TIMESTAMP),
+            (2, 'Create game initialization state and turn switching', 3, 'done', '2026-06-10 18:00:00', CURRENT_TIMESTAMP);
+            """)
+            cursor.execute("""
+            INSERT INTO task (project_id, title, position, status, due_date, created_at) VALUES
+            (3, 'Implement rule checks for Check and Checkmate', 1, 'in_progress', '2026-06-20 18:00:00', CURRENT_TIMESTAMP),
+            (3, 'Add special move logic (Castling, En Passant)', 2, 'in_progress', '2026-06-22 18:00:00', CURRENT_TIMESTAMP),
+            (3, 'Build basic UI for Captured Pieces sidebar', 3, 'in_progress', '2026-06-25 18:00:00', CURRENT_TIMESTAMP);
+            """)
+            cursor.execute("""
+            INSERT INTO task (project_id, title, position, status, due_date, created_at) VALUES
+            (4, 'Integrate match timer clock (Blitz style)', 1, 'todo', '2026-07-01 12:00:00', CURRENT_TIMESTAMP),
+            (4, 'Write unit tests for move validation matrix', 2, 'todo', '2026-07-03 12:00:00', CURRENT_TIMESTAMP),
+            (4, 'Fix UI collision bugs on mobile screen layouts', 3, 'todo', '2026-07-05 12:00:00', CURRENT_TIMESTAMP);
+            """)
+            cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (1, 1), (2, 1);")
+            cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (3, 2);")
+            cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (4, 3);")
+            cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (1, 4);")
+            cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (4, 5), (1, 5);")
+            cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (2, 6), (3, 6);")
+            cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (3, 7);")
+            cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (2, 8);")
+            cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (1, 9), (3, 9);")
+            cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (4, 10);")
+            cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (2, 11), (4, 11);")
+            cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (3, 12);")
+            cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (4, 13);")
+            conn.commit()
         conn.close()
 
     def get_database(self):
