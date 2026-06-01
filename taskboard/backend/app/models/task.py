@@ -5,30 +5,30 @@ class Task:
     def __init__(
             self,
             task_id: int,
-            category_id: int,
+            project_id: int,
             title: str,
             position: int,
             comment: str,
-            is_completed: bool,
+            status: str,
             due_date: str,
             created_at: str
     ):
         self.task_id = task_id
-        self.category_id = category_id
+        self.project_id = project_id
         self.title = title
         self.position = position
         self.comment = comment
-        self.is_completed = is_completed
+        self.status = status
         self.due_date = due_date
         self.created_at = created_at
 
         self._task = {
             "task_id": self.task_id,
-            "category_id": self.category_id,
+            "project_id": self.project_id,
             "title": self.title,
             "position": self.position,
             "comment": self.comment,
-            "is_completed": self.is_completed,
+            "status": self.status,
             "due_date": self.due_date,
             "created_at": self.created_at
         }
