@@ -1,56 +1,66 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProjectCard from "../components/ProjectCard";
 import ProjectModal from "../components/ProjectModal";
-
-const MOCK_PROJECTS = [
-  { id: 1, name: "Website Redesign", description: "Revamp the landing page", task_count: 3 },
-  { id: 2, name: "Mobile App", description: "iOS and Android launch", task_count: 5 },
-  { id: 3, name: "Database Migration", description: "Move to new server", task_count: 2 },
-];
+import { projectsApi } from "../api";
 
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState(() => {
-    const saved = localStorage.getItem("projects");
-    return saved ? JSON.parse(saved) : MOCK_PROJECTS;
-  });
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const navigate = useNavigate();
 
-  const handleCreate = (formData) => {
-    const newProject = {
-      id: projects.length + 1,
-      ...formData,
-      task_count: 0,
-    };
-    const updated = [...projects, newProject];
-    setProjects(updated);
-    localStorage.setItem("projects", JSON.stringify(updated));
-    setShowModal(false);
+  const fetchProjects = async () => {
+    try {
+      const data = await projectsApi.getAll();
+      setProjects(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleUpdate = (formData) => {
-    const updated = projects.map((p) =>
-      p.id === editingProject.id ? { ...p, ...formData } : p
-    );
-    setProjects(updated);
-    localStorage.setItem("projects", JSON.stringify(updated));
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const handleCreate = async (formData) => {
+    await projectsApi.create({
+      name: formData.name,
+      board_id: 1,
+      position: projects.length + 1,
+    });
+    setShowModal(false);
+    fetchProjects();
+  };
+
+  const handleUpdate = async (formData) => {
+    await projectsApi.update(editingProject.project_id, {
+      name: formData.name,
+      board_id: 1,
+      position: editingProject.position,
+    });
     setEditingProject(null);
     setShowModal(false);
+    fetchProjects();
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (!window.confirm("Delete this project and all its tasks?")) return;
-    const updated = projects.filter((p) => p.id !== id);
-    setProjects(updated);
-    localStorage.setItem("projects", JSON.stringify(updated));
+    await projectsApi.delete(id);
+    fetchProjects();
   };
 
   const openEdit = (project) => {
     setEditingProject(project);
     setShowModal(true);
   };
+
+  if (loading) return <div className="loading">Loading projects...</div>;
+  if (error) return <div className="error">Error: {error}</div>;
 
   return (
     <div className="page">
@@ -69,11 +79,11 @@ export default function ProjectsPage() {
         <div className="projects-grid">
           {projects.map((project) => (
             <ProjectCard
-              key={project.id}
-              project={project}
-              onClick={() => navigate(`/projects/${project.id}`)}
+              key={project.project_id}
+              project={{ ...project, id: project.project_id, task_count: 0 }}
+              onClick={() => navigate(`/projects/${project.project_id}`)}
               onEdit={() => openEdit(project)}
-              onDelete={() => handleDelete(project.id)}
+              onDelete={() => handleDelete(project.project_id)}
             />
           ))}
         </div>

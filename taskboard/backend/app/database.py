@@ -48,6 +48,7 @@ class Database:
             position INTEGER NOT NULL,
             comment TEXT,
             status TEXT DEFAULT 'todo' CHECK(status IN ('todo', 'in_progress', 'done')),
+            priority TEXT DEFAULT 'medium' CHECK(priority IN ('low', 'medium', 'high')),           
             due_date TEXT,
             created_at TEXT,
             
@@ -73,7 +74,7 @@ class Database:
         cursor = conn.cursor()
 
         cursor.execute("SELECT * FROM user")
-        if cursor.rowcount == 0:
+        if len(cursor.fetchall()) == 0:
             # Empty and remake current tables
             cursor.execute("DROP TABLE IF EXISTS user")
             cursor.execute("DROP TABLE IF EXISTS board")
@@ -103,29 +104,29 @@ class Database:
             (1, 'Sprint 3', 4);
             """)
             cursor.execute("""
-            INSERT INTO task (project_id, title, position, status, due_date, created_at) VALUES
-            (1, 'Implement AI opponent using Minimax algorithm', 1, 'todo', '2026-07-15 23:59:59', CURRENT_TIMESTAMP),
-            (1, 'Add online multiplayer via WebSockets', 2, 'todo', '2026-07-30 23:59:59', CURRENT_TIMESTAMP),
-            (1, 'Design custom chess piece themes', 3, 'todo', NULL, CURRENT_TIMESTAMP),
-            (1, 'Save game history to local storage', 4, 'todo', NULL, CURRENT_TIMESTAMP);
+            INSERT INTO task (project_id, title, position, status, priority, due_date, created_at) VALUES
+            (1, 'Implement AI opponent using Minimax algorithm', 1, 'todo', 'high', '2026-07-15 23:59:59', CURRENT_TIMESTAMP),
+            (1, 'Add online multiplayer via WebSockets', 2, 'todo', 'high', '2026-07-30 23:59:59', CURRENT_TIMESTAMP),
+            (1, 'Design custom chess piece themes', 3, 'todo', 'medium', NULL, CURRENT_TIMESTAMP),
+            (1, 'Save game history to local storage', 4, 'todo', 'low', NULL, CURRENT_TIMESTAMP);
             """)
             cursor.execute("""
-            INSERT INTO task (project_id, title, position, status, due_date, created_at) VALUES
-            (2, 'Set up rendering for 8x8 grid chessboard', 1, 'done', '2026-06-05 18:00:00', CURRENT_TIMESTAMP),
-            (2, 'Define core piece movement logic (Pawn, Rook, Knight)', 2, 'done', '2026-06-08 18:00:00', CURRENT_TIMESTAMP),
-            (2, 'Create game initialization state and turn switching', 3, 'done', '2026-06-10 18:00:00', CURRENT_TIMESTAMP);
+            INSERT INTO task (project_id, title, position, status, priority, due_date, created_at) VALUES
+            (2, 'Set up rendering for 8x8 grid chessboard', 1, 'done', 'high', '2026-06-05 18:00:00', CURRENT_TIMESTAMP),
+            (2, 'Define core piece movement logic (Pawn, Rook, Knight)', 2, 'done', 'high', '2026-06-08 18:00:00', CURRENT_TIMESTAMP),
+            (2, 'Create game initialization state and turn switching', 3, 'done', 'medium', '2026-06-10 18:00:00', CURRENT_TIMESTAMP);
             """)
             cursor.execute("""
-            INSERT INTO task (project_id, title, position, status, due_date, created_at) VALUES
-            (3, 'Implement rule checks for Check and Checkmate', 1, 'in_progress', '2026-06-20 18:00:00', CURRENT_TIMESTAMP),
-            (3, 'Add special move logic (Castling, En Passant)', 2, 'in_progress', '2026-06-22 18:00:00', CURRENT_TIMESTAMP),
-            (3, 'Build basic UI for Captured Pieces sidebar', 3, 'in_progress', '2026-06-25 18:00:00', CURRENT_TIMESTAMP);
+            INSERT INTO task (project_id, title, position, status, priority, due_date, created_at) VALUES
+            (3, 'Implement rule checks for Check and Checkmate', 1, 'in_progress', 'high', '2026-06-20 18:00:00', CURRENT_TIMESTAMP),
+            (3, 'Add special move logic (Castling, En Passant)', 2, 'in_progress', 'medium', '2026-06-22 18:00:00', CURRENT_TIMESTAMP),
+            (3, 'Build basic UI for Captured Pieces sidebar', 3, 'in_progress', 'low', '2026-06-25 18:00:00', CURRENT_TIMESTAMP);
             """)
             cursor.execute("""
-            INSERT INTO task (project_id, title, position, status, due_date, created_at) VALUES
-            (4, 'Integrate match timer clock (Blitz style)', 1, 'todo', '2026-07-01 12:00:00', CURRENT_TIMESTAMP),
-            (4, 'Write unit tests for move validation matrix', 2, 'todo', '2026-07-03 12:00:00', CURRENT_TIMESTAMP),
-            (4, 'Fix UI collision bugs on mobile screen layouts', 3, 'todo', '2026-07-05 12:00:00', CURRENT_TIMESTAMP);
+            INSERT INTO task (project_id, title, position, status, priority, due_date, created_at) VALUES
+            (4, 'Integrate match timer clock (Blitz style)', 1, 'todo', 'high', '2026-07-01 12:00:00', CURRENT_TIMESTAMP),
+            (4, 'Write unit tests for move validation matrix', 2, 'todo', 'medium', '2026-07-03 12:00:00', CURRENT_TIMESTAMP),
+            (4, 'Fix UI collision bugs on mobile screen layouts', 3, 'todo', 'low', '2026-07-05 12:00:00', CURRENT_TIMESTAMP);
             """)
             cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (1, 1), (2, 1);")
             cursor.execute("INSERT INTO user_task (user_id, task_id) VALUES (3, 2);")

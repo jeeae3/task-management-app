@@ -1,6 +1,6 @@
 import sqlite3
 from typing import List, Optional
-from taskboard.backend.app.models.project import Project
+from models.project import Project
 
 
 class SqlProjectRepository:

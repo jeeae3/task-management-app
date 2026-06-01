@@ -10,6 +10,7 @@ class Task:
             position: int,
             comment: str,
             status: str,
+            priority: str,
             due_date: str,
             created_at: str
     ):
@@ -19,6 +20,7 @@ class Task:
         self.position = position
         self.comment = comment
         self.status = status
+        self.priority = priority
         self.due_date = due_date
         self.created_at = created_at
 
@@ -29,6 +31,7 @@ class Task:
             "position": self.position,
             "comment": self.comment,
             "status": self.status,
+            "priority": self.priority,
             "due_date": self.due_date,
             "created_at": self.created_at
         }

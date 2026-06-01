@@ -1,5 +1,5 @@
 from flask import request, jsonify, Blueprint
-from taskboard.backend.app.schemas.task import SqlTaskRepository
+from schemas.task import SqlTaskRepository
 
 repo = SqlTaskRepository()
 
@@ -17,6 +17,7 @@ def create_task():
         position=data.get('position'),
         comment=data.get('comment'),
         status=data.get('status'),
+        priority=data.get('priority'),
         due_date=data.get('due_date'),
         created_at=data.get('created_at')
     )
@@ -58,6 +59,7 @@ def update_task(id):
         position=data.get('position'),
         comment=data.get('comment'),
         status=data.get('status'),
+        priority=data.get('priority'),
         due_date=data.get('due_date'),
         created_at=data.get('created_at')
     )

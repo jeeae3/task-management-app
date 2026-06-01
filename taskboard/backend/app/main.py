@@ -3,8 +3,11 @@ from routes.projects import project_pages
 import sqlite3
 import database
 from flask import Flask
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
+
 app.register_blueprint(task_pages)
 app.register_blueprint(project_pages)
 

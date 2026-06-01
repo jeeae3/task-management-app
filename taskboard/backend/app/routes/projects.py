@@ -1,5 +1,5 @@
 from flask import request, jsonify, Blueprint
-from taskboard.backend.app.schemas.project import SqlProjectRepository
+from schemas.project import SqlProjectRepository
 
 repo = SqlProjectRepository()
 

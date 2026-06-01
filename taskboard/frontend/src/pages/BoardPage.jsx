@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import TaskCard from "../components/TaskCard";
 import TaskModal from "../components/TaskModal";
+import { projectsApi, tasksApi } from "../api";
 
 const COLUMNS = [
   { key: "todo", label: "To Do", color: "#6b7280" },
@@ -9,49 +10,84 @@ const COLUMNS = [
   { key: "done", label: "Done", color: "#10b981" },
 ];
 
-// Mock data — replace with real API calls once backend is ready
-const MOCK_TASKS = [
-  { id: 1, project_id: 1, title: "Design mockups", description: "Figma designs for all screens", status: "todo", priority: "high" },
-  { id: 2, project_id: 1, title: "Set up repo", description: "Initialize GitHub repo", status: "in_progress", priority: "medium" },
-  { id: 3, project_id: 1, title: "Write README", description: "Document the project", status: "done", priority: "low" },
-  { id: 4, project_id: 1, title: "Fix login bug", description: "Users can't log in on mobile", status: "todo", priority: "high" },
-];
-
-const MOCK_PROJECT = { id: 1, name: "Website Redesign", description: "Revamp the landing page" };
-
 export default function BoardPage() {
   const { id } = useParams();
-  const [tasks, setTasks] = useState(MOCK_TASKS);
+  const [project, setProject] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
 
-  const handleCreateTask = (formData) => {
-    const newTask = {
-      id: tasks.length + 1,
-      project_id: Number(id),
-      ...formData,
-    };
-    setTasks([...tasks, newTask]);
-    setShowModal(false);
+  const fetchData = async () => {
+    try {
+      const [proj, allTasks] = await Promise.all([
+        projectsApi.getOne(id),
+        tasksApi.getAll(),
+      ]);
+      setProject(proj);
+      setTasks(allTasks.filter((t) => t.project_id === Number(id)));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleUpdateTask = (formData) => {
-    setTasks(tasks.map((t) =>
-      t.id === editingTask.id ? { ...t, ...formData } : t
-    ));
+  useEffect(() => {
+    fetchData();
+  }, [id]);
+
+  const handleCreateTask = async (formData) => {
+    await tasksApi.create({
+      project_id: Number(id),
+      title: formData.title,
+      comment: formData.description,
+      status: formData.status,
+      priority: formData.priority,
+      position: tasks.length + 1,
+      due_date: null,
+      created_at: new Date().toISOString(),
+    });
+    setShowModal(false);
+    fetchData();
+  };
+
+  const handleUpdateTask = async (formData) => {
+    await tasksApi.update(editingTask.task_id, {
+      project_id: Number(id),
+      title: formData.title,
+      comment: formData.description,
+      status: formData.status,
+      priority: formData.priority,
+      position: editingTask.position,
+      due_date: editingTask.due_date,
+      created_at: editingTask.created_at,
+    });
     setEditingTask(null);
     setShowModal(false);
+    fetchData();
   };
 
-  const handleStatusChange = (taskId, newStatus) => {
-    setTasks(tasks.map((t) =>
-      t.id === taskId ? { ...t, status: newStatus } : t
-    ));
+  const handleStatusChange = async (taskId, newStatus) => {
+    const task = tasks.find((t) => t.task_id === taskId);
+    await tasksApi.update(taskId, {
+      project_id: Number(id),
+      title: task.title,
+      comment: task.comment,
+      status: newStatus,
+      priority: task.priority,
+      position: task.position,
+      due_date: task.due_date,
+      created_at: task.created_at,
+    });
+    fetchData();
   };
 
-  const handleDeleteTask = (taskId) => {
+  const handleDeleteTask = async (taskId) => {
     if (!window.confirm("Delete this task?")) return;
-    setTasks(tasks.filter((t) => t.id !== taskId));
+    await tasksApi.delete(taskId);
+    fetchData();
   };
 
   const openEdit = (task) => {
@@ -59,13 +95,15 @@ export default function BoardPage() {
     setShowModal(true);
   };
 
+  if (loading) return <div className="loading">Loading board...</div>;
+  if (error) return <div className="error">Error: {error}</div>;
+
   return (
     <div className="page">
       <div className="page-header">
         <div>
           <Link to="/" className="back-link">← Projects</Link>
-          <h1>{MOCK_PROJECT.name}</h1>
-          <p className="project-desc">{MOCK_PROJECT.description}</p>
+          <h1>{project?.name}</h1>
         </div>
         <button className="btn btn-primary" onClick={() => setShowModal(true)}>
           + Add Task
@@ -84,10 +122,15 @@ export default function BoardPage() {
               <div className="column-body">
                 {colTasks.map((task) => (
                   <TaskCard
-                    key={task.id}
-                    task={task}
+                    key={task.task_id}
+                    task={{
+                      ...task,
+                      id: task.task_id,
+                      description: task.comment,
+                      priority: task.priority,
+                    }}
                     onEdit={() => openEdit(task)}
-                    onDelete={() => handleDeleteTask(task.id)}
+                    onDelete={() => handleDeleteTask(task.task_id)}
                     onStatusChange={handleStatusChange}
                     columns={COLUMNS}
                   />
@@ -103,7 +146,11 @@ export default function BoardPage() {
 
       {showModal && (
         <TaskModal
-          task={editingTask}
+          task={editingTask ? {
+            ...editingTask,
+            description: editingTask.comment,
+            priority: editingTask.priority,
+          } : null}
           onSubmit={editingTask ? handleUpdateTask : handleCreateTask}
           onClose={() => { setShowModal(false); setEditingTask(null); }}
         />
