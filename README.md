@@ -70,7 +70,7 @@ The easiest way to run the full stack with one command.
 git clone https://github.com/jeeae3/task-management-app.git
 
 # 2. Navigate to taskboard folder
-cd task-management-app/taskboard
+cd ~/task-management-app/taskboard
 
 # 3. Build and start all services
 docker-compose up --build
