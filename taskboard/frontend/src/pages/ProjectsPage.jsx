@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProjectCard from "../components/ProjectCard";
 import ProjectModal from "../components/ProjectModal";
-import { projectsApi } from "../api";
+import { projectsApi, tasksApi } from "../api";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
@@ -13,15 +13,28 @@ export default function ProjectsPage() {
   const navigate = useNavigate();
 
   const fetchProjects = async () => {
-    try {
-      const data = await projectsApi.getAll();
-      setProjects(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const [projectData, taskData] = await Promise.all([
+      projectsApi.getAll(),
+      tasksApi.getAll(),
+    ]);
+
+    console.log("First task project_id:", taskData[0].project_id);
+    console.log("First project project_id:", projectData[0].project_id);
+    
+    // Count tasks per project
+    const projectsWithCount = projectData.map((project) => ({
+      ...project,
+      task_count: taskData.filter((t) => t.project_id === project.project_id).length,
+    }));
+    
+    setProjects(projectsWithCount);
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchProjects();
@@ -80,7 +93,7 @@ export default function ProjectsPage() {
           {projects.map((project) => (
             <ProjectCard
               key={project.project_id}
-              project={{ ...project, id: project.project_id, task_count: 0 }}
+              project={{ ...project, id: project.project_id}}
               onClick={() => navigate(`/projects/${project.project_id}`)}
               onEdit={() => openEdit(project)}
               onDelete={() => handleDelete(project.project_id)}
