@@ -1,0 +1,67 @@
+version: "3.9"
+
+services:
+
+  # ── Flask Backend ────────────────────────────────────────────────────
+  backend:
+    build: ./backend
+    container_name: taskboard_backend
+    ports:
+      - "4000:4000"
+    volumes:
+      - db_data:/app/data
+    networks:
+      - taskboard_net
+    restart: unless-stopped
+
+  # ── React Frontend (served via nginx) ────────────────────────────────
+  frontend:
+    build: ./frontend
+    container_name: taskboard_frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - taskboard_net
+    restart: unless-stopped
+
+  # ── Prometheus ────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: taskboard_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - taskboard_net
+    restart: unless-stopped
+
+  # ── Grafana ───────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    container_name: taskboard_grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=taskboard123
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - taskboard_net
+    restart: unless-stopped
+
+# ── Volumes ───────────────────────────────────────────────────────────
+volumes:
+  db_data:
+  grafana_data:
+
+# ── Network ───────────────────────────────────────────────────────────
+networks:
+  taskboard_net:
+    driver: bridge

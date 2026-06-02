@@ -4,9 +4,11 @@ import sqlite3
 import database
 from flask import Flask
 from flask_cors import CORS
+from prometheus_flask_exporter import PrometheusMetrics
 
 app = Flask(__name__)
 CORS(app)
+metrics = PrometheusMetrics(app)
 
 app.register_blueprint(task_pages)
 app.register_blueprint(project_pages)
